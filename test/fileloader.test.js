@@ -88,4 +88,8 @@ describe('fileloader.test.js', function () {
     info.src.should.equal('gbk change');
     fs.writeFileSync(filepath, orginal);
   });
+
+  it('should return null when view not exists', function () {
+    should.not.exist(loader.getSource('not-exists.txt'));
+  });
 });
