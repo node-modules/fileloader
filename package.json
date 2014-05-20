@@ -1,6 +1,6 @@
 {
   "name": "fileloader",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "more stable file loader for nunjucks, and support charsets like `gbk`.",
   "main": "index.js",
   "scripts": {
