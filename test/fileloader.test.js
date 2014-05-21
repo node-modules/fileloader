@@ -17,6 +17,7 @@
 var should = require('should');
 var path = require('path');
 var fs = require('fs');
+var mm = require('mm');
 var FileLoader = require('../');
 
 describe('fileloader.test.js', function () {
@@ -28,6 +29,8 @@ describe('fileloader.test.js', function () {
   var charsets = {};
   charsets[dirs[1]] = 'gbk';
   var loader = new FileLoader(dirs, true, charsets);
+
+  afterEach(mm.restore);
 
   it('should get change file dir1', function (done) {
     var info = loader.getSource('foo.txt');
@@ -91,5 +94,61 @@ describe('fileloader.test.js', function () {
 
   it('should return null when view not exists', function () {
     should.not.exist(loader.getSource('not-exists.txt'));
+  });
+
+  it('should work with upper case charset', function () {
+    var cs = {};
+    cs[path.join(dirs[0], 'subdir1')] = 'UTF-8';
+    cs[dirs[0]] = 'UTF8';
+    cs[dirs[1]] = 'GBK';
+    var loader = new FileLoader([dirs[0], dirs[1], path.join(dirs[0], 'subdir1')], false, cs);
+    var info = loader.getSource('dir2file.txt');
+    info.src.should.include('知道');
+
+    var info = loader.getSource('foo.txt');
+    info.src.should.equal('bar\n');
+
+    var info = loader.getSource('subdirfile.txt');
+    info.src.should.equal('subfile\n');
+  });
+
+  it('should get from current dir when dirs param missing', function () {
+    mm(process, 'cwd', function () {
+      return dirs[0];
+    });
+    var loader = new FileLoader();
+    var info = loader.getSource('foo.txt');
+    info.src.should.equal('bar\n');
+  });
+
+  it('should support dirs as string', function () {
+    var loader = new FileLoader(dirs[0]);
+    var info = loader.getSource('foo.txt');
+    info.src.should.equal('bar\n');
+  });
+
+  it('should support custom watch', function (done) {
+    var cb;
+    function watch(dirs, listener) {
+      cb = listener;
+    }
+
+    var loader = new FileLoader(dirs, watch);
+    var info = loader.getSource('foo.txt');
+    info.src.should.equal('bar\n');
+
+    var info = loader.getSource('subdir1/subdirfile.txt');
+    var filepath = path.join(dirs[0], 'subdir1', 'subdirfile.txt');
+    info.path.should.equal(filepath);
+    info.src.should.equal('subfile\n');
+
+    loader.once('update', function (name) {
+      name.should.equal('subdir1/subdirfile.txt');
+      done();
+    });
+
+    setTimeout(function () {
+      cb({path: path.join(dirs[0], 'subdir1', 'subdirfile.txt')});
+    }, 10);
   });
 });

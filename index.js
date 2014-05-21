@@ -70,7 +70,7 @@ proto._watch = function (dirs, listener) {
 proto.getSource = function (name) {
   var fullpath = null;
   var paths = this.searchPaths;
-  var charset;
+  var charset = '';
 
   for (var i = 0; i < paths.length; i++) {
     var root = paths[i];
@@ -80,7 +80,10 @@ proto.getSource = function (name) {
     // underneath it to be searched
     if (fs.existsSync(p)) {
       fullpath = p;
-      charset = this.charsets[root] || 'utf8';
+      charset = this.charsets[root];
+      if (charset) {
+        charset = charset.toLowerCase();
+      }
       break;
     }
   }
@@ -93,7 +96,7 @@ proto.getSource = function (name) {
   this.pathsToNames[fullpath] = name;
   var content = fs.readFileSync(fullpath);
   debug('view %s mapping to %s, charset: %s, size: %d', name, fullpath, charset, content.length);
-  if (charset !== 'utf8' || charset !== 'utf-8') {
+  if (charset && (charset !== 'utf8' || charset !== 'utf-8')) {
     content = iconv.decode(content, charset);
   } else {
     content = content.toString();

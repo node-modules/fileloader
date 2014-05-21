@@ -22,6 +22,7 @@
     "cov": "*",
     "istanbul-harmony": "*",
     "jshint": "*",
+    "mm": "~0.2.1",
     "mocha": "*",
     "should": "~3.3.1"
   },
