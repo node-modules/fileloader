@@ -12,9 +12,9 @@
     }
   },
   "dependencies": {
-    "debug": "~0.8.1",
-    "iconv-lite": "~0.2.11",
-    "wt": "~0.1.0"
+    "debug": "~1.0.2",
+    "iconv-lite": "~0.4.3",
+    "wt": "~0.2.0"
   },
   "devDependencies": {
     "autod": "*",
@@ -24,7 +24,7 @@
     "jshint": "*",
     "mm": "~0.2.1",
     "mocha": "*",
-    "should": "~3.3.1"
+    "should": "~4.0.4"
   },
   "homepage": "https://github.com/node-modules/fileloader",
   "repository": {

@@ -76,7 +76,7 @@ describe('fileloader.test.js', function () {
     var orginal = fs.readFileSync(filepath);
     var info = loader.getSource('dir2file.txt');
     info.path.should.equal(filepath);
-    info.src.should.include('知道');
+    info.src.should.containEql('知道');
 
 
     loader.once('update', function (name) {
@@ -103,7 +103,7 @@ describe('fileloader.test.js', function () {
     cs[dirs[1]] = 'GBK';
     var loader = new FileLoader([dirs[0], dirs[1], path.join(dirs[0], 'subdir1')], false, cs);
     var info = loader.getSource('dir2file.txt');
-    info.src.should.include('知道');
+    info.src.should.containEql('知道');
 
     var info = loader.getSource('foo.txt');
     info.src.should.equal('bar\n');
