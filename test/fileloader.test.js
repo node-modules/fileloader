@@ -159,6 +159,12 @@ describe('fileloader.test.js', function () {
     info.path.should.equal(filepath);
     info.src.should.equal('bar\n');
 
+    info = loader.getSource('/foo.txt');
+    info.path.should.equal(filepath);
+
+    info = loader.getSource('/home');
+    info.path.should.equal(path.join(dirs[0], 'home'));
+
     filepath = path.join(dirs[0], 'noexist.txt');
     info = loader.getSource(filepath);
     assert(info === null);
