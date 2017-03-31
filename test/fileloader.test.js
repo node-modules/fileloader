@@ -18,6 +18,7 @@ var should = require('should');
 var path = require('path');
 var fs = require('fs');
 var mm = require('mm');
+var assert = require('assert');
 var FileLoader = require('../');
 
 describe('fileloader.test.js', function () {
@@ -150,5 +151,21 @@ describe('fileloader.test.js', function () {
     setTimeout(function () {
       cb({path: path.join(dirs[0], 'subdir1', 'subdirfile.txt')});
     }, 10);
+  });
+
+  it('should support fullpath', function () {
+    var filepath = path.join(dirs[0], 'foo.txt');
+    var info = loader.getSource(filepath);
+    info.path.should.equal(filepath);
+    info.src.should.equal('bar\n');
+
+    filepath = path.join(dirs[0], 'noexist.txt');
+    info = loader.getSource(filepath);
+    assert(info === null);
+
+    filepath = path.join(dirs[1], 'dir2file.txt');
+    info = loader.getSource(filepath);
+    info.path.should.equal(filepath);
+    info.src.should.containEql('知道');
   });
 });
