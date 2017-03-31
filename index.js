@@ -19,7 +19,7 @@ var fs = require('fs');
 var path = require('path');
 var util = require('util');
 var iconv = require('iconv-lite');
-var EventEmitter = require('events').EventEmitter;
+var EventEmitter = require('events');
 var wt = require('wt');
 
 module.exports = FileLoader;
