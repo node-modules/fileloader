@@ -72,25 +72,37 @@ proto.getSource = function (name) {
   var paths = this.searchPaths;
   var charset = '';
 
-  for (var i = 0; i < paths.length; i++) {
-    var root = paths[i];
-    var p = path.join(root, name);
+  if (!path.isAbsolute(name)) {
+    for (var i = 0; i < paths.length; i++) {
+      var root = paths[i];
+      var p = path.join(root, name);
 
-    // Only allow the current directory and anything
-    // underneath it to be searched
-    if (fs.existsSync(p)) {
-      fullpath = p;
-      charset = this.charsets[root];
-      if (charset) {
-        charset = charset.toLowerCase();
+      // Only allow the current directory and anything
+      // underneath it to be searched
+      if (fs.existsSync(p)) {
+        fullpath = p;
+        charset = this.charsets[root];
+        if (charset) {
+          charset = charset.toLowerCase();
+        }
+        break;
       }
-      break;
     }
-  }
 
-  if (!fullpath) {
-    debug('view %s not found in %j', name, this.searchPaths);
-    return null;
+    if (!fullpath) {
+      debug('view %s not found in %j', name, this.searchPaths);
+      return null;
+    }
+  } else {
+    if (!fs.existsSync(name)) return null;
+    fullpath = name;
+    var roots = Object.keys(this.charsets);
+    for (var i = 0, j = roots.length; i < j; i++) {
+      if (fullpath.indexOf(roots[i]) > -1) {
+        charset = this.charsets[roots[i]];
+        break;
+      }
+    }
   }
 
   this.pathsToNames[fullpath] = name;
