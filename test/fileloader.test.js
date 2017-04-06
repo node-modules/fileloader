@@ -1,169 +1,154 @@
-/**!
- * fileloader - test/fileloader.test.js
- *
- * Copyright(c) 2014 fengmk2 and other contributors.
- * MIT Licensed
- *
- * Authors:
- *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.github.com)
- */
+'use strict';
 
-"use strict";
+const path = require('path');
+const fs = require('fs');
+const mm = require('mm');
+const assert = require('assert');
+const FileLoader = require('../');
 
-/**
- * Module dependencies.
- */
-
-var should = require('should');
-var path = require('path');
-var fs = require('fs');
-var mm = require('mm');
-var assert = require('assert');
-var FileLoader = require('../');
-
-describe('fileloader.test.js', function () {
-  var fixtures = path.join(__dirname, 'fixtures');
-  var dirs = [
+describe('fileloader.test.js', () => {
+  const fixtures = path.join(__dirname, 'fixtures');
+  const dirs = [
     path.join(fixtures, 'dir1'),
     path.join(fixtures, 'dir2'),
   ];
-  var charsets = {};
+  const charsets = {};
   charsets[dirs[1]] = 'gbk';
-  var loader = new FileLoader(dirs, true, charsets);
+  const loader = new FileLoader(dirs, true, charsets);
 
   afterEach(mm.restore);
 
-  it('should get change file dir1', function (done) {
-    var info = loader.getSource('foo.txt');
-    var filepath = path.join(dirs[0], 'foo.txt');
-    info.path.should.equal(filepath);
-    info.src.should.equal('bar\n');
+  it('should get change file dir1', done => {
+    let info = loader.getSource('foo.txt');
+    const filepath = path.join(dirs[0], 'foo.txt');
+    assert(info.path === filepath);
+    assert(info.src === 'bar\n');
 
-    loader.once('update', function (name) {
-      name.should.equal('foo.txt');
+    loader.once('update', function(name) {
+      assert(name === 'foo.txt');
       done();
     });
 
     fs.writeFileSync(filepath, 'bar change');
 
     info = loader.getSource('foo.txt');
-    info.path.should.equal(filepath);
-    info.src.should.equal('bar change');
+    assert(info.path === filepath);
+    assert(info.src === 'bar change');
     fs.writeFileSync(filepath, 'bar\n');
   });
 
-  it('should get change file dir1/subdir1/subdirfile.txt', function (done) {
-    var info = loader.getSource('subdir1/subdirfile.txt');
-    var filepath = path.join(dirs[0], 'subdir1', 'subdirfile.txt');
-    info.path.should.equal(filepath);
-    info.src.should.equal('subfile\n');
+  it('should get change file dir1/subdir1/subdirfile.txt', done => {
+    let info = loader.getSource('subdir1/subdirfile.txt');
+    const filepath = path.join(dirs[0], 'subdir1', 'subdirfile.txt');
+    assert(info.path === filepath);
+    assert(info.src === 'subfile\n');
 
-    loader.once('update', function (name) {
-      name.should.equal('subdir1/subdirfile.txt');
+    loader.once('update', function(name) {
+      assert(name === 'subdir1/subdirfile.txt');
       done();
     });
 
     fs.writeFileSync(filepath, 'subfile change');
 
     info = loader.getSource('subdir1/subdirfile.txt');
-    info.path.should.equal(filepath);
-    info.src.should.equal('subfile change');
+    assert(info.path === filepath);
+    assert(info.src === 'subfile change');
 
     fs.writeFileSync(filepath, 'subfile\n');
   });
 
-  it('should get change file and decode gbk charset content', function (done) {
-    var filepath = path.join(dirs[1], 'dir2file.txt');
-    var orginal = fs.readFileSync(filepath);
-    var info = loader.getSource('dir2file.txt');
-    info.path.should.equal(filepath);
-    info.src.should.containEql('知道');
+  it('should get change file and decode gbk charset content', done => {
+    const filepath = path.join(dirs[1], 'dir2file.txt');
+    const orginal = fs.readFileSync(filepath);
+    let info = loader.getSource('dir2file.txt');
+    assert(info.path === filepath);
+    assert(info.src.includes('知道'));
 
 
-    loader.once('update', function (name) {
-      name.should.equal('dir2file.txt');
+    loader.once('update', name => {
+      assert(name === 'dir2file.txt');
       done();
     });
 
     fs.writeFileSync(filepath, 'gbk change');
 
     info = loader.getSource('dir2file.txt');
-    info.path.should.equal(filepath);
-    info.src.should.equal('gbk change');
+    assert(info.path === filepath);
+    assert(info.src === 'gbk change');
     fs.writeFileSync(filepath, orginal);
   });
 
-  it('should return null when view not exists', function () {
-    should.not.exist(loader.getSource('not-exists.txt'));
+  it('should return null when view not exists', () => {
+    assert(!loader.getSource('not-exists.txt'));
   });
 
-  it('should work with upper case charset', function () {
-    var cs = {};
+  it('should work with upper case charset', () => {
+    const cs = {};
     cs[path.join(dirs[0], 'subdir1')] = 'UTF-8';
     cs[dirs[0]] = 'UTF8';
     cs[dirs[1]] = 'GBK';
-    var loader = new FileLoader([dirs[0], dirs[1], path.join(dirs[0], 'subdir1')], false, cs);
-    var info = loader.getSource('dir2file.txt');
-    info.src.should.containEql('知道');
+    const loader = new FileLoader([ dirs[0], dirs[1], path.join(dirs[0], 'subdir1') ], false, cs);
+    let info = loader.getSource('dir2file.txt');
+    assert(info.src.includes('知道'));
 
-    var info = loader.getSource('foo.txt');
-    info.src.should.equal('bar\n');
+    info = loader.getSource('foo.txt');
+    assert(info.src === 'bar\n');
 
-    var info = loader.getSource('subdirfile.txt');
-    info.src.should.equal('subfile\n');
+    info = loader.getSource('subdirfile.txt');
+    assert(info.src === 'subfile\n');
   });
 
-  it('should get from current dir when dirs param missing', function () {
-    mm(process, 'cwd', function () {
+  it('should get from current dir when dirs param missing', () => {
+    mm(process, 'cwd', () => {
       return dirs[0];
     });
-    var loader = new FileLoader();
-    var info = loader.getSource('foo.txt');
-    info.src.should.equal('bar\n');
+    const loader = new FileLoader();
+    const info = loader.getSource('foo.txt');
+    assert(info.src === 'bar\n');
   });
 
-  it('should support dirs as string', function () {
-    var loader = new FileLoader(dirs[0]);
-    var info = loader.getSource('foo.txt');
-    info.src.should.equal('bar\n');
+  it('should support dirs as string', () => {
+    const loader = new FileLoader(dirs[0]);
+    const info = loader.getSource('foo.txt');
+    assert(info.src === 'bar\n');
   });
 
-  it('should support custom watch', function (done) {
-    var cb;
+  it('should support custom watch', done => {
+    let cb;
     function watch(dirs, listener) {
       cb = listener;
     }
 
-    var loader = new FileLoader(dirs, watch);
-    var info = loader.getSource('foo.txt');
-    info.src.should.equal('bar\n');
+    const loader = new FileLoader(dirs, watch);
+    let info = loader.getSource('foo.txt');
+    assert(info.src === 'bar\n');
 
-    var info = loader.getSource('subdir1/subdirfile.txt');
-    var filepath = path.join(dirs[0], 'subdir1', 'subdirfile.txt');
-    info.path.should.equal(filepath);
-    info.src.should.equal('subfile\n');
+    info = loader.getSource('subdir1/subdirfile.txt');
+    const filepath = path.join(dirs[0], 'subdir1', 'subdirfile.txt');
+    assert(info.path === filepath);
+    assert(info.src === 'subfile\n');
 
-    loader.once('update', function (name) {
-      name.should.equal('subdir1/subdirfile.txt');
+    loader.once('update', function(name) {
+      assert(name === 'subdir1/subdirfile.txt');
       done();
     });
 
-    setTimeout(function () {
-      cb({path: path.join(dirs[0], 'subdir1', 'subdirfile.txt')});
+    setTimeout(() => {
+      cb({ path: path.join(dirs[0], 'subdir1', 'subdirfile.txt') });
     }, 10);
   });
 
-  it('should support fullpath', function () {
-    var filepath = path.join(dirs[0], 'foo.txt');
-    var info = loader.getSource(filepath);
-    info.path.should.equal(filepath);
-    info.src.should.equal('bar\n');
+  it('should support fullpath', () => {
+    let filepath = path.join(dirs[0], 'foo.txt');
+    let info = loader.getSource(filepath);
+    assert(info.path === filepath);
+    assert(info.src === 'bar\n');
 
     info = loader.getSource('/foo.txt');
-    info.path.should.equal(filepath);
+    assert(info.path === filepath);
 
     info = loader.getSource('/home');
-    info.path.should.equal(path.join(dirs[0], 'home'));
+    assert(info.path === path.join(dirs[0], 'home'));
 
     filepath = path.join(dirs[0], 'noexist.txt');
     info = loader.getSource(filepath);
@@ -171,7 +156,7 @@ describe('fileloader.test.js', function () {
 
     filepath = path.join(dirs[1], 'dir2file.txt');
     info = loader.getSource(filepath);
-    info.path.should.equal(filepath);
-    info.src.should.containEql('知道');
+    assert(info.path === filepath);
+    assert(info.src.includes('知道'));
   });
 });

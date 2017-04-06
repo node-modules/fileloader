@@ -7,27 +7,24 @@
     "index.js"
   ],
   "scripts": {
-    "test": "mocha --check-leaks -R spec -t 5000 test/*.test.js",
-    "test-cov": "node node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --check-leaks -t 5000 test/*.test.js",
-    "test-travis": "node node_modules/.bin/istanbul cover node_modules/.bin/_mocha --report lcovonly -- --check-leaks -t 5000 test/*.test.js",
-    "jshint": "jshint .",
-    "autod": "autod -w --prefix '~'",
-    "cnpm": "npm install --registry=https://registry.npm.taobao.org",
-    "contributors": "contributors -f plain -o AUTHORS"
+    "test": "egg-bin test",
+    "test-cov": "egg-bin cov",
+    "ci": "npm run lint && npm run test-cov",
+    "lint": "eslint *.js test",
+    "autod": "autod"
   },
   "dependencies": {
-    "debug": "~2.2.0",
-    "iconv-lite": "~0.4.8",
-    "wt": "~1.0.0"
+    "debug": "^2.6.3",
+    "iconv-lite": "^0.4.15",
+    "wt": "^1.1.1"
   },
   "devDependencies": {
-    "autod": "*",
-    "contributors": "*",
-    "istanbul": "*",
-    "jshint": "*",
-    "mm": "~1.1.0",
-    "mocha": "*",
-    "should": "~6.0.1"
+    "autod": "^2.8.0",
+    "egg-bin": "^1.10.3",
+    "egg-ci": "^1.6.0",
+    "eslint": "^3.19.0",
+    "eslint-config-egg": "^3.2.0",
+    "mm": "^2.1.0"
   },
   "homepage": "https://github.com/node-modules/fileloader",
   "repository": {
@@ -40,10 +37,18 @@
     "email": "fengmk2@gmail.com"
   },
   "keywords": [
-    "fileloader", "nunjucks", "watch", "watcher", "loader", "file"
+    "fileloader",
+    "nunjucks",
+    "watch",
+    "watcher",
+    "loader",
+    "file"
   ],
   "engines": {
-    "node": ">= 0.12.0"
+    "node": ">= 4.0.0"
+  },
+  "ci": {
+    "version": "4, 6, 7"
   },
   "author": "fengmk2 <fengmk2@gmail.com> (http://fengmk2.com)",
   "license": "MIT"
