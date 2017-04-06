@@ -11,6 +11,7 @@ module.exports = {
     'eslint',
     'eslint-config-egg',
     'egg-bin',
+    'egg-ci',
   ],
   keep: [
   ],
