@@ -1,26 +1,12 @@
-/**!
- * fileloader - index.js
- *
- * Copyright(c) node-modules and other contributors.
- * MIT Licensed
- *
- * Authors:
- *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.com)
- */
-
 'use strict';
 
-/**
- * Module dependencies.
- */
-
-var debug = require('debug')('fileloader');
-var fs = require('fs');
-var path = require('path');
-var util = require('util');
-var iconv = require('iconv-lite');
-var EventEmitter = require('events');
-var wt = require('wt');
+const debug = require('debug')('fileloader');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const iconv = require('iconv-lite');
+const EventEmitter = require('events');
+const wt = require('wt');
 
 module.exports = FileLoader;
 
@@ -35,11 +21,11 @@ function FileLoader(dirs, watch, charsets) {
   this.pathsToNames = {};
 
   if (dirs) {
-    dirs = Array.isArray(dirs) ? dirs : [dirs];
+    dirs = Array.isArray(dirs) ? dirs : [ dirs ];
     // For windows, convert to forward slashes
     this.searchPaths = dirs.map(path.normalize);
   } else {
-    this.searchPaths = [process.cwd()];
+    this.searchPaths = [ process.cwd() ];
   }
 
   if (watch) {
@@ -54,27 +40,26 @@ function FileLoader(dirs, watch, charsets) {
 
 util.inherits(FileLoader, EventEmitter);
 
-var proto = FileLoader.prototype;
+const proto = FileLoader.prototype;
 
-proto.update = function (info) {
+proto.update = function(info) {
   debug('file %s %s', info.event, info.path);
   this.emit('update', this.pathsToNames[info.path]);
 };
 
-proto._watch = function (dirs, listener) {
-  var watcher = wt.watch(dirs);
+proto._watch = function(dirs, listener) {
+  const watcher = wt.watch(dirs);
   watcher.on('file', listener);
   debug('start watch on %j', dirs);
 };
 
-proto.getSource = function (name) {
-  var fullpath = null;
-  var paths = this.searchPaths;
-  var charset = '';
+proto.getSource = function(name) {
+  let fullpath = null;
+  const paths = this.searchPaths;
+  let charset = '';
 
-  for (var i = 0; i < paths.length; i++) {
-    var root = paths[i];
-    var p = path.join(root, name);
+  for (const root of paths) {
+    const p = path.join(root, name);
 
     // Only allow the current directory and anything
     // underneath it to be searched
@@ -90,10 +75,10 @@ proto.getSource = function (name) {
 
   if (!fullpath && path.isAbsolute(name) && fs.existsSync(name)) {
     fullpath = name;
-    var roots = Object.keys(this.charsets);
-    for (var i = 0, j = roots.length; i < j; i++) {
-      if (fullpath.indexOf(roots[i]) > -1) {
-        charset = this.charsets[roots[i]];
+    const roots = Object.keys(this.charsets);
+    for (const root of roots) {
+      if (fullpath.indexOf(root) > -1) {
+        charset = this.charsets[root];
         break;
       }
     }
@@ -105,7 +90,7 @@ proto.getSource = function (name) {
   }
 
   this.pathsToNames[fullpath] = name;
-  var content = fs.readFileSync(fullpath);
+  let content = fs.readFileSync(fullpath);
   debug('view %s mapping to %s, charset: %s, size: %d', name, fullpath, charset, content.length);
   if (charset && (charset !== 'utf8' || charset !== 'utf-8')) {
     content = iconv.decode(content, charset);
@@ -114,6 +99,6 @@ proto.getSource = function (name) {
   }
   return {
     src: content,
-    path: fullpath
+    path: fullpath,
   };
 };
