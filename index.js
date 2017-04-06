@@ -92,7 +92,7 @@ proto.getSource = function(name) {
   this.pathsToNames[fullpath] = name;
   let content = fs.readFileSync(fullpath);
   debug('view %s mapping to %s, charset: %s, size: %d', name, fullpath, charset, content.length);
-  if (charset && (charset !== 'utf8' || charset !== 'utf-8')) {
+  if (charset && charset !== 'utf8' && charset !== 'utf-8') {
     content = iconv.decode(content, charset);
   } else {
     content = content.toString();
